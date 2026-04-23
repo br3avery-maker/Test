@@ -22,6 +22,9 @@
       "files": ["**/*.test.js", "**/*.spec.js"],
       "env": {
         "jest": true
+      },
+      "globals": {
+        "global": "readonly"
       }
     }
   ],

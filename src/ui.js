@@ -265,7 +265,13 @@ export class UIRenderer {
     const connectBtn = document.getElementById('connect-wallet')
 
     if (display.isConnected && display.walletAddress) {
-      addressEl.textContent = display.walletAddress.slice(0, 6) + '...' + display.walletAddress.slice(-4)
+      // Sanitize and validate address format
+      const address = display.walletAddress
+      if (typeof address === 'string' && /^0x[a-fA-F0-9]{40}$/.test(address)) {
+        addressEl.textContent = address.slice(0, 6) + '...' + address.slice(-4)
+      } else {
+        addressEl.textContent = 'Invalid Address'
+      }
       connectBtn.textContent = '🔌 Disconnect'
       connectBtn.disabled = false
       connectBtn.onclick = () => this.app.disconnectWallet()
@@ -298,19 +304,19 @@ export class UIRenderer {
     const feedback = document.getElementById('mining-feedback')
     const successEl = document.createElement('div')
     successEl.className = 'mining-success'
-    successEl.innerHTML = `
-      <span class="mining-icon">✅</span>
-      <span class="mining-text">Block Mined! Difficulty: ${difficulty}, Reward: ${reward} tokens</span>
-    `
-    
+
+    const iconSpan = document.createElement('span')
+    iconSpan.className = 'mining-icon'
+    iconSpan.textContent = '✅'
+
+    const textSpan = document.createElement('span')
+    textSpan.className = 'mining-text'
+    textSpan.textContent = `Block Mined! Difficulty: ${difficulty}, Reward: ${reward} tokens`
+
+    successEl.appendChild(iconSpan)
+    successEl.appendChild(textSpan)
     feedback.appendChild(successEl)
-    
     setTimeout(() => successEl.remove(), 3000)
-    
-    // Update difficulty periodically
-    setTimeout(() => {
-      this.app.adjustDifficulty()
-    }, 5000)
   }
 
   showNotification(message, type = 'info') {

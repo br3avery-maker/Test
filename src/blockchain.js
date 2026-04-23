@@ -101,7 +101,7 @@ export class Blockchain {
     }
 
     try {
-      // Reconstruct the message that was signed
+      // Reconstruct the message that was signed (must match signTransaction)
       const messageData = {
         index: blockData.index,
         type: blockData.type,
@@ -116,25 +116,37 @@ export class Blockchain {
       }
       const message = JSON.stringify(messageData)
 
-      // For proper verification, we need the public key
-      // In a full implementation, this would be stored or derived
-      // For now, we'll do basic format validation
-      // TODO: Implement full signature verification with public key lookup
+      // For now, we only validate local wallet signatures
+      // TODO: Implement full public key lookup and verification
+      if (window.app && window.app.walletManager && window.app.walletManager.localKeyPair) {
+        const signatureBytes = this.hexToArrayBuffer(blockData.signature)
+        const messageBytes = new TextEncoder().encode(message)
 
-      // Check signature format (hex string)
-      if (!/^[0-9a-f]{128}$/i.test(blockData.signature)) {
-        return false
+        return await window.crypto.subtle.verify(
+          {
+            name: 'ECDSA',
+            hash: { name: 'SHA-256' }
+          },
+          window.app.walletManager.localKeyPair.publicKey,
+          signatureBytes,
+          messageBytes
+        )
       }
 
-      // In production, verify against public key:
-      // const publicKey = await this.getPublicKeyForAccount(blockData.account)
-      // return await this.verifyECDSASignature(message, blockData.signature, publicKey)
-
-      return true // Basic format check passed
+      // Check signature format (hex string) as fallback
+      return /^[0-9a-f]{128}$/i.test(blockData.signature)
     } catch (error) {
       console.error('Signature verification error:', error)
       return false
     }
+  }
+
+  hexToArrayBuffer(hex) {
+    const bytes = new Uint8Array(hex.length / 2)
+    for (let i = 0; i < bytes.length; i++) {
+      bytes[i] = parseInt(hex.substr(i * 2, 2), 16)
+    }
+    return bytes.buffer
   }
 
   getBalance(account = null) {
