@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
-import { resolve } from 'path'
+import path from 'path'
 
 export default defineConfig({
   root: 'public',
@@ -14,10 +14,5 @@ export default defineConfig({
   },
   preview: {
     port: 4000
-  },
-  resolve: {
-    alias: {
-      '/src': resolve(__dirname, 'src')
-    }
   }
 })

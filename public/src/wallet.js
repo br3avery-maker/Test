@@ -1,43 +1,20 @@
 export class WalletManager {
-  async connect() {
-    // Try Web3Modal (MetaMask, Coinbase, WalletConnect)
-    if (typeof Web3Modal !== "undefined") {
-      try {
-        const providerOptions = {}
-        if (typeof WalletConnectProvider !== "undefined") {
-          providerOptions.walletconnect = {
-            package: WalletConnectProvider,
-            options: { infuraId: "3cd025f895f440ebb679e9f1cd25cc14" }
-          }
-        }
-        this.web3Modal = new Web3Modal({
-          cacheProvider: true,
-          providerOptions,
-          theme: { background: "#0f0f23", main: "#00ff88", secondary: "#00ccff" }
-        })
-        const provider = await this.web3Modal.connect()
-        const accounts = await provider.request({ method: "eth_accounts" })
-        if (accounts?.[0]) {
-          this.accounts = accounts
-          this.provider = provider
-          this.connected = true
-          this.chainId = await provider.request({ method: "eth_chainId" })
-          return accounts[0]
-        }
-      } catch(e) { console.log("Web3Modal failed, falling back", e) }
-    }
-    if (typeof window.ethereum !== "undefined") { return this.connectInjected() }
-    return this.generateLocalWallet()
-  }
-
   constructor() {
-    this.web3Modal = null
     this.provider = null
     this.accounts = []
     this.connected = false
     this.chainId = null
   }
 
+  async connect() {
+    // Check for injected provider (MetaMask, etc.)
+    if (typeof window.ethereum !== 'undefined') {
+      return this.connectInjected()
+    }
+    
+    // Fallback: generate local wallet
+    return this.generateLocalWallet()
+  }
 
   async connectInjected() {
     try {

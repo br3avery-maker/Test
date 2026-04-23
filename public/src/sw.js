@@ -2,8 +2,7 @@ const CACHE_NAME = 'tapmine-v1'
 const ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/assets/index-DsVjzRgq.js'
+  '/manifest.json'
 ]
 
 self.addEventListener('install', (event) => {
@@ -34,6 +33,7 @@ self.addEventListener('fetch', (event) => {
         })
       })
     }).catch(() => {
+      // Return offline fallback for navigation requests
       if (event.request.mode === 'navigate') {
         return caches.match('/')
       }

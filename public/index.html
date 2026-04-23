@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="TapMine Chain - Tap to mine crypto with physical screen taps. Blockchain PWA with Google Drive node hosting.">
   <title>TapMine Chain - Tap-to-Mine Blockchain PWA</title>
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛓️</text></svg>">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -27,6 +27,9 @@
       Loading TapMine Chain...
     </div>
   </div>
-  <script type="module" src="/src/main.js"></script>
+  <!-- Web3Modal + dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@2.0.0-alpha.1/dist/umd/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.12/dist/index.min.js"></script>
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>
