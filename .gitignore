@@ -1,0 +1,17 @@
+.DS_Store
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+*.log
+test-results/
+coverage/
+.nyc_output/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
