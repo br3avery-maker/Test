@@ -83,7 +83,7 @@ export class UIRenderer {
   bindEvents() {
     // Touch/mouse events for mining
     let isPointerDown = false
-    let pointers = new Map()
+    const pointers = new Map()
 
     const handlePointerDown = (e) => {
       e.preventDefault()

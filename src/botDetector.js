@@ -6,16 +6,26 @@ export class BotDetector {
       minInterval: 80,
       maxInterval: 500,
       maxRegularity: 0.3,
-      minVariance: 5
+      minVariance: 5,
+      maxTapsPerSecond: 10,
+      rateLimitWindow: 1000 // 1 second window
     }
+    this.tapTimestamps = []
   }
 
   recordTap(tapData) {
+    const now = Date.now()
     this.tapHistory.push({
       ...tapData,
-      recordTime: Date.now()
+      recordTime: now
     })
-    
+
+    // Track timestamps for rate limiting
+    this.tapTimestamps.push(now)
+    // Clean old timestamps outside the rate limit window
+    const cutoff = now - this.humanThresholds.rateLimitWindow
+    this.tapTimestamps = this.tapTimestamps.filter(t => t > cutoff)
+
     if (this.tapHistory.length > this.maxHistory) {
       this.tapHistory.shift()
     }
@@ -27,7 +37,15 @@ export class BotDetector {
     }
 
     const checks = []
-    
+
+    // Check 0: Rate limiting (max 10 taps/second)
+    const rateLimitPass = this.checkRateLimit()
+    checks.push({
+      name: 'rateLimit',
+      pass: rateLimitPass,
+      value: this.tapTimestamps.length
+    })
+
     // Check 1: Interval regularity
     const intervals = this.getRecentIntervals()
     if (intervals.length >= 2) {
@@ -130,12 +148,21 @@ export class BotDetector {
     return Math.min(tapsPerSecond / 15, 1) // 15 taps/sec is max plausible
   }
 
+  checkRateLimit() {
+    // Check if tap rate exceeds human physical limit (10 taps/second)
+    const now = Date.now()
+    const windowStart = now - this.humanThresholds.rateLimitWindow
+    const recentTaps = this.tapTimestamps.filter(t => t > windowStart)
+
+    return recentTaps.length <= this.humanThresholds.maxTapsPerSecond
+  }
+
   isLikelyBot() {
     if (this.tapHistory.length < 10) return false
-    
+
     const recentIntervals = this.getRecentIntervals().slice(-10)
     const regularity = this.calculateRegularity(recentIntervals)
-    
+
     return regularity > 0.1 // Very regular = likely bot
   }
 }
