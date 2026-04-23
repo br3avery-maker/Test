@@ -13,7 +13,6 @@ class TapMineApp {
     this.tapMiner = new TapMiner()
     this.botDetector = new BotDetector()
     this.ui = new UIRenderer()
-    
     this.state = {
       isConnected: false,
       balance: 0,
@@ -26,16 +25,12 @@ class TapMineApp {
 
   async init() {
     console.log('Initializing TapMine Chain...')
-    
     await this.blockchain.init()
     this.ui.init(this)
-    
     this.tapMiner.on('hashFound', (blockData) => this.onHashFound(blockData))
     this.tapMiner.on('tapRecorded', (tapData) => this.onTapRecorded(tapData))
-    
     await this.loadOrCreateGenesis()
     this.attemptDriveSync()
-    
     console.log('TapMine Chain initialized')
   }
 
@@ -58,14 +53,11 @@ class TapMineApp {
       this.ui.showNotification('Bot pattern detected!', 'error')
       return
     }
-
     const success = this.blockchain.addBlock(blockData)
-    
     if (success) {
       this.state.balance = this.blockchain.getBalance()
       this.state.chainLength = this.blockchain.getChainLength()
       this.state.hashRate = this.tapMiner.getHashRate()
-      
       this.ui.updateChainDisplay(this.state)
       this.ui.showMiningSuccess(blockData.difficulty, blockData.reward)
       this.ui.triggerConfetti()
@@ -81,7 +73,6 @@ class TapMineApp {
   async attemptDriveSync() {
     this.state.syncStatus = 'syncing'
     this.ui.updateSyncStatus(this.state)
-    
     try {
       await this.driveStorage.saveChain(this.blockchain.export())
       this.state.syncStatus = 'synced'
@@ -109,13 +100,11 @@ class TapMineApp {
     const hashRate = this.tapMiner.getHashRate()
     const targetTime = 3000
     const avgTime = this.blockchain.getAverageBlockTime()
-    
     if (avgTime < targetTime * 0.5) {
       this.state.difficulty++
     } else if (avgTime > targetTime * 2 && this.state.difficulty > 1) {
       this.state.difficulty--
     }
-    
     this.tapMiner.setDifficulty(this.state.difficulty)
     this.ui.updateChainDisplay(this.state)
   }
