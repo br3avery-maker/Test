@@ -12,6 +12,7 @@ export class UIRenderer {
     this.render()
     this.bindEvents()
     this.startGameLoop()
+    this.initAds()
   }
 
   render() {
@@ -48,6 +49,14 @@ export class UIRenderer {
             <span class="sync-dot"></span>
             <span class="sync-text">Ready</span>
           </span>
+        </div>
+
+        <div class="hud-section ads-section">
+          <div class="ad-buttons">
+            <button id="ad-extra-taps" class="btn btn-secondary" title="Watch ad for 5 extra taps">🎯 +5 Taps</button>
+            <button id="ad-booster" class="btn btn-secondary" title="Watch ad for 2x mining speed">🚀 2x Speed</button>
+            <button id="ad-tokens" class="btn btn-secondary" title="Watch ad for 100 tokens">💰 +100 Tokens</button>
+          </div>
         </div>
       </div>
 
@@ -179,6 +188,19 @@ export class UIRenderer {
       this.app.state.isConnected = connected
       this.app.state.walletAddress = accounts[0] || null
       this.updateWalletDisplay(this.app.state)
+    })
+
+    // Ad buttons
+    document.getElementById('ad-extra-taps').addEventListener('click', () => {
+      this.app.watchAdForExtraTaps()
+    })
+
+    document.getElementById('ad-booster').addEventListener('click', () => {
+      this.app.watchAdForBooster()
+    })
+
+    document.getElementById('ad-tokens').addEventListener('click', () => {
+      this.app.watchAdForTokens()
     })
 
     // Window resize
@@ -386,6 +408,40 @@ export class UIRenderer {
       p.y -= p.vy
       p.x += p.vx
       return p.life > 0
+    })
+  }
+
+  async initAds() {
+    // Initialize banner ad after a short delay
+    setTimeout(async () => {
+      if (this.app.adsManager.canShowBanner()) {
+        const success = await this.app.adsManager.showBanner('bottom')
+        if (success) {
+          console.log('Banner ad displayed')
+        }
+      }
+    }, 3000) // Show banner 3 seconds after load
+
+    // Set up interstitial ads for game milestones
+    this.setupInterstitialTriggers()
+  }
+
+  setupInterstitialTriggers() {
+    let blocksMined = 0
+
+    // Listen for hash found events to trigger interstitials
+    this.app.tapMiner.on('hashFound', async () => {
+      blocksMined++
+
+      // Show interstitial every 10 blocks
+      if (blocksMined % 10 === 0 && this.app.adsManager.canShowInterstitial()) {
+        setTimeout(async () => {
+          const success = await this.app.adsManager.showInterstitial()
+          if (success) {
+            console.log('Interstitial ad shown after', blocksMined, 'blocks')
+          }
+        }, 1000) // Show after 1 second delay
+      }
     })
   }
 }

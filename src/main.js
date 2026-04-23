@@ -4,6 +4,7 @@ import { DriveStorage } from './drive.js'
 import { TapMiner } from './tapMiner.js'
 import { BotDetector } from './botDetector.js'
 import { UIRenderer } from './ui.js'
+import { AdsManager } from './ads.js'
 
 class TapMineApp {
   constructor() {
@@ -12,6 +13,7 @@ class TapMineApp {
     this.driveStorage = new DriveStorage()
     this.tapMiner = new TapMiner()
     this.botDetector = new BotDetector()
+    this.adsManager = new AdsManager()
     this.ui = new UIRenderer()
     this.state = {
       isConnected: false,
@@ -19,13 +21,15 @@ class TapMineApp {
       chainLength: 0,
       syncStatus: 'idle',
       difficulty: 4,
-      hashRate: 0
+      hashRate: 0,
+      activeBooster: null
     }
   }
 
   async init() {
     console.log('Initializing TapMine Chain...')
     await this.blockchain.init()
+    await this.adsManager.init()
     this.ui.init(this)
     this.tapMiner.on('hashFound', (blockData) => this.onHashFound(blockData))
     this.tapMiner.on('tapRecorded', (tapData) => this.onTapRecorded(tapData))
@@ -101,6 +105,58 @@ class TapMineApp {
     this.state.isConnected = false
     this.state.walletAddress = null
     this.ui.updateWalletDisplay(this.state)
+  }
+
+  // Ad reward methods
+  async watchAdForExtraTaps() {
+    try {
+      const result = await this.adsManager.rewardExtraTaps(5)
+      if (result.success) {
+        this.ui.showNotification(`🎁 Earned ${result.taps} extra taps!`, 'success')
+        // Could implement extra taps logic here
+      } else {
+        this.ui.showNotification('Ad not completed', 'warning')
+      }
+    } catch (error) {
+      console.error('Ad error:', error)
+      this.ui.showNotification('Ad failed to load', 'error')
+    }
+  }
+
+  async watchAdForBooster() {
+    try {
+      const result = await this.adsManager.rewardBooster(2, 30)
+      if (result.success) {
+        this.state.activeBooster = result.booster
+        this.ui.showNotification(`🚀 2x mining speed for ${result.booster.duration}s!`, 'success')
+        // Start booster timer
+        setTimeout(() => {
+          this.state.activeBooster = null
+          this.ui.showNotification('Booster expired', 'info')
+        }, result.booster.duration * 1000)
+      } else {
+        this.ui.showNotification('Ad not completed', 'warning')
+      }
+    } catch (error) {
+      console.error('Ad error:', error)
+      this.ui.showNotification('Ad failed to load', 'error')
+    }
+  }
+
+  async watchAdForTokens() {
+    try {
+      const result = await this.adsManager.rewardTokens(100)
+      if (result.success) {
+        this.state.balance += result.tokens
+        this.ui.showNotification(`💰 Earned ${result.tokens} tokens!`, 'success')
+        this.ui.updateStats(this.state)
+      } else {
+        this.ui.showNotification('Ad not completed', 'warning')
+      }
+    } catch (error) {
+      console.error('Ad error:', error)
+      this.ui.showNotification('Ad failed to load', 'error')
+    }
   }
 
   adjustDifficulty() {

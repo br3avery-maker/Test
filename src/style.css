@@ -455,18 +455,55 @@ body {
   }
 }
 
+/* Ad Section */
+.ads-section {
+  margin-left: auto;
+}
+
+.ad-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ad-buttons .btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  min-width: auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .ads-section {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+    margin: 8px 0;
+  }
+
+  .ad-buttons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 480px) {
   .stats-section {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .wallet-section {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .ad-buttons .btn {
+    flex: 1;
+    min-width: 80px;
   }
 }

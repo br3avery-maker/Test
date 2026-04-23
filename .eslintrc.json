@@ -14,7 +14,8 @@
     "Web3Modal": "readonly",
     "WalletConnectProvider": "readonly",
     "gapi": "readonly",
-    "google": "readonly"
+    "google": "readonly",
+    "playgama": "readonly"
   },
   "overrides": [
     {
