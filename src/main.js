@@ -96,6 +96,13 @@ class TapMineApp {
     }
   }
 
+  disconnectWallet() {
+    this.walletManager.disconnect()
+    this.state.isConnected = false
+    this.state.walletAddress = null
+    this.ui.updateWalletDisplay(this.state)
+  }
+
   adjustDifficulty() {
     const hashRate = this.tapMiner.getHashRate()
     const targetTime = 3000

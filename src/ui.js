@@ -171,9 +171,14 @@ export class UIRenderer {
     this.tapArea.addEventListener('touchend', handlePointerUp, { passive: false })
     this.tapArea.addEventListener('touchcancel', handlePointerCancel, { passive: false })
 
-    // Wallet connection
-    document.getElementById('connect-wallet').addEventListener('click', () => {
-      this.app.connectWallet()
+    // Wallet connection handled in updateWalletDisplay()
+
+    // Listen for wallet changes
+    window.addEventListener('walletChanged', (e) => {
+      const { accounts, connected, chainId } = e.detail
+      this.app.state.isConnected = connected
+      this.app.state.walletAddress = accounts[0] || null
+      this.updateWalletDisplay(this.app.state)
     })
 
     // Window resize
@@ -236,15 +241,17 @@ export class UIRenderer {
     const display = state || this.app.state
     const addressEl = document.getElementById('wallet-address')
     const connectBtn = document.getElementById('connect-wallet')
-    
+
     if (display.isConnected && display.walletAddress) {
       addressEl.textContent = display.walletAddress.slice(0, 6) + '...' + display.walletAddress.slice(-4)
-      connectBtn.textContent = '🔗 Connected'
-      connectBtn.disabled = true
+      connectBtn.textContent = '🔌 Disconnect'
+      connectBtn.disabled = false
+      connectBtn.onclick = () => this.app.disconnectWallet()
     } else {
       addressEl.textContent = 'Not Connected'
       connectBtn.textContent = '🔗 Connect Wallet'
       connectBtn.disabled = false
+      connectBtn.onclick = () => this.app.connectWallet()
     }
   }
 

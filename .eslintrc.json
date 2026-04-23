@@ -16,6 +16,14 @@
     "gapi": "readonly",
     "google": "readonly"
   },
+  "overrides": [
+    {
+      "files": ["**/*.test.js", "**/*.spec.js"],
+      "env": {
+        "jest": true
+      }
+    }
+  ],
   "rules": {
     "no-unused-vars": "warn",
     "no-console": "off",

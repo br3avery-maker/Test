@@ -22,6 +22,19 @@ export class WalletManager {
           this.provider = provider
           this.connected = true
           this.chainId = await provider.request({ method: "eth_chainId" })
+
+          // Set up event listeners for Web3Modal provider
+          provider.on('accountsChanged', (accounts) => {
+            this.accounts = accounts
+            this.updateWalletDisplay()
+          })
+
+          provider.on('chainChanged', (chainId) => {
+            this.chainId = chainId
+            this.updateWalletDisplay()
+          })
+
+          this.updateWalletDisplay()
           return accounts[0]
         }
       } catch(e) { console.log("Web3Modal failed, falling back", e) }
@@ -80,7 +93,8 @@ export class WalletManager {
     
     // Save encrypted keystore
     await this.saveKeystore(keyPair, address)
-    
+
+    this.updateWalletDisplay()
     return address
   }
 
@@ -188,6 +202,13 @@ export class WalletManager {
     this.accounts = []
     this.provider = null
     this.chainId = null
+
+    // Clear Web3Modal cached provider
+    if (this.web3Modal) {
+      this.web3Modal.clearCachedProvider()
+    }
+
+    this.updateWalletDisplay()
   }
 
   updateWalletDisplay() {
